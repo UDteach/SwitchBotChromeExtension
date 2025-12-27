@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "SwitchBot Dashboard",
+    "version": "1.0",
+    "description": "SwitchBot Controller Dashboard",
+    "chrome_url_overrides": {
+        "newtab": "index.html"
+    },
+    "permissions": [
+        "storage"
+    ],
+    "host_permissions": [
+        "https://api.switch-bot.com/*"
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'none'"
+    }
+}

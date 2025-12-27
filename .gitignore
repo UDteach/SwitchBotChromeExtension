@@ -1,0 +1,24 @@
+
+# System
+.DS_Store
+Thumbs.db
+
+# Config / Secrets
+config/device_data.json
+GEMINI.md
+*.key
+*.pem
+
+# Editor
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log
+
+# Artifacts
+*.exe
+*.dll
+*.so
+*.dylib

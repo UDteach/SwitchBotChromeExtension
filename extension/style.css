@@ -1,0 +1,924 @@
+:root {
+    --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-highlight: rgba(255, 255, 255, 0.2);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --accent-color: #00d2ff;
+    --accent-glow: 0 0 20px rgba(0, 210, 255, 0.5);
+    --blur-amount: 20px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    color: var(--text-primary);
+    background: var(--bg-gradient);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Abstract blobs for "Liquid" feel */
+.background::before,
+.background::after {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 210, 255, 0.15) 0%, rgba(58, 123, 213, 0.05) 70%, transparent 100%);
+    filter: blur(80px);
+    z-index: -1;
+    animation: floating 20s infinite ease-in-out;
+}
+
+.background::before {
+    top: -100px;
+    left: -100px;
+}
+
+.background::after {
+    bottom: -100px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(255, 0, 150, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+    animation-delay: -10s;
+}
+
+@keyframes floating {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(50px, 50px);
+    }
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    padding: 2rem;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+    flex-wrap: wrap;
+}
+
+.header-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-amount));
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.header-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Clock Card */
+.clock-card {
+    flex: 1.5;
+    min-width: 300px;
+    align-items: center;
+    order: 2;
+    /* Middle */
+}
+
+.time {
+    font-size: 5rem;
+    font-weight: 200;
+    letter-spacing: -2px;
+    line-height: 1;
+    background: linear-gradient(to bottom, #fff 0%, #ddd 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+
+.time .seconds {
+    font-size: 0.6em;
+    opacity: 0.9;
+    margin-left: 4px;
+    font-weight: 300;
+    vertical-align: baseline;
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.9);
+    color: white;
+}
+
+.date {
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Weather Card */
+.weather-card {
+    flex: 1;
+    min-width: 250px;
+    align-items: center;
+    gap: 1rem;
+    flex-direction: row;
+    order: 1;
+    /* Left */
+}
+
+/* Calendar Card */
+.calendar-card {
+    flex: 1;
+    min-width: 250px;
+    padding: 1.2rem;
+    order: 3;
+}
+
+.weather-icon {
+    font-size: 3.5rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.weather-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.weather-temp {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.weather-details {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 10px;
+}
+
+.weather-loading,
+.weather-error {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    width: 100%;
+    text-align: center;
+}
+
+/* Calendar Card */
+.calendar-card {
+    flex: 1;
+    min-width: 240px;
+    padding: 1.2rem;
+}
+
+.widget-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.calendar-grid {
+    width: 100%;
+    font-size: 0.8rem;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 4px;
+}
+
+.calendar-day-name {
+    text-align: center;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 4px;
+}
+
+.calendar-day {
+    text-align: center;
+    padding: 4px 0;
+    color: var(--text-primary);
+    border-radius: 6px;
+    cursor: default;
+    transition: background 0.2s;
+}
+
+.calendar-day:hover:not(.empty) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-day.empty {
+    visibility: hidden;
+}
+
+.calendar-day.today {
+    background: var(--accent-color);
+    color: white;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 210, 255, 0.4);
+}
+
+.calendar-day.sunday,
+.calendar-day-name.sunday {
+    color: #ff6b6b;
+}
+
+.calendar-day.saturday,
+.calendar-day-name.saturday {
+    color: #54a0ff;
+}
+
+.calendar-day.today.sunday,
+.calendar-day.today.saturday {
+    color: white;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 900px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header-card {
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .clock-card {
+        flex-direction: column;
+    }
+}
+
+/* Main Scroll Area */
+.dashboard-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px;
+    overflow-y: auto;
+    padding: 0 1rem 100px 1rem;
+    /* Bottom padding for footer */
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.dashboard-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+/* Sections */
+.section {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.section.hidden {
+    display: none;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    padding-left: 0.8rem;
+    border-left: 3px solid var(--accent-color);
+    color: var(--text-primary);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Devices Grid */
+.devices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    padding: 0.5rem;
+}
+
+/* Drag & Drop Styles */
+.tile {
+    /* ... existing styles ... */
+    cursor: grab;
+    /* Enable grab cursor */
+    touch-action: none;
+    /* Attempt to handle touch dragging in future */
+}
+
+.tile:active {
+    cursor: grabbing;
+}
+
+.tile.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.tile.drag-over {
+    border-color: var(--accent-color);
+    transform: scale(1.05);
+}
+
+/* Dropzone feedback */
+.devices-grid.drag-over-zone {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+}
+
+/* Liquid Glass Tile */
+.tile {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
+    border: 1px solid var(--glass-border);
+    border-top: 1px solid var(--glass-highlight);
+    border-left: 1px solid var(--glass-highlight);
+    box-shadow: var(--glass-shadow);
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shine effect */
+.tile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: skewX(-25deg);
+    transition: 0.5s;
+}
+
+.tile:hover::before {
+    left: 150%;
+}
+
+.tile:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.tile:active {
+    transform: scale(0.95);
+}
+
+/* Active State (ON) */
+.tile.active {
+    background: rgba(0, 210, 255, 0.15);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 30px rgba(0, 210, 255, 0.2), inset 0 0 10px rgba(0, 210, 255, 0.1);
+}
+
+.tile-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s;
+}
+
+.tile.active .tile-icon {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 15px var(--accent-color));
+}
+
+.tile-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: center;
+    color: var(--text-primary);
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tile-status {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+.tile.active .tile-status {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* Footer Controls */
+.footer-controls {
+    position: fixed;
+    bottom: 2.5rem;
+    display: flex;
+    gap: 1.5rem;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    border: 1px solid var(--glass-border);
+}
+
+.footer-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Loading */
+.loading-message {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
+/* Modal */
+.modal-content {
+    background: rgba(30, 30, 46, 0.95);
+    backdrop-filter: blur(30px);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    padding: 2.5rem;
+    max-height: 85vh;
+    max-width: 90vw;
+    width: 450px;
+    overflow-y: auto;
+}
+
+.modal h2 {
+    margin-top: 0;
+    font-weight: 300;
+    margin-bottom: 2rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+}
+
+.form-group input {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: var(--accent-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.2);
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+    transition: all 0.3s;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 210, 255, 0.4);
+}
+
+.secondary-btn {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 24px;
+    border-radius: 12px;
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: white;
+}
+
+/* Modal Overlay */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+/* Hidden Utility Class */
+.hidden {
+    display: none !important;
+}
+
+/* Form Group */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Modal Actions */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-actions button {
+    cursor: pointer;
+    border: none;
+    font-size: 0.95rem;
+}
+
+/* Hidden Devices List */
+.hidden-list {
+    max-height: 150px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.hidden-list:empty::after {
+    content: "非表示のデバイスはありません";
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: block;
+    text-align: center;
+    padding: 10px;
+}
+
+/* Help Text */
+.help-text {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0 0 8px 0;
+    opacity: 0.8;
+}
+
+/* Device Visibility List */
+.device-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.device-visibility-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.device-visibility-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.device-visibility-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--accent-color);
+}
+
+.device-visibility-item label {
+    flex: 1;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.device-visibility-item .device-icon {
+    font-size: 1.1rem;
+}
+
+.device-visibility-item .device-type {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.empty-message {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 15px;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toggle-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.toggle-option:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.toggle-option:has(input:checked) {
+    background: rgba(0, 210, 255, 0.1);
+    border-color: var(--accent-color);
+}
+
+.toggle-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+
+.toggle-label {
+    display: flex;
+    flex-direction: column;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.toggle-label small {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Seconds in clock - REMOVE DUPLICATE IF PRESENT */
+/* .time .seconds { ... } rule removed/consolidated above */
+
+/* Update Status */
+#update-status {
+    margin-top: 0.8rem;
+    font-size: 0.75rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 0.9;
+    transition: opacity 0.3s;
+    text-align: center;
+}
+
+/* Settings Options */
+.settings-options {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.setting-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.setting-row span {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.setting-row select {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.setting-row select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    flex: 1;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+
+/* Tile Size Variants */
+.tiles-small .tile {
+    height: 90px;
+    padding: 0.75rem;
+}
+
+.tiles-small .tile-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.3rem;
+}
+
+.tiles-small .tile-name {
+    font-size: 0.7rem;
+}
+
+.tiles-small .tile-status {
+    font-size: 0.6rem;
+}
+
+.tiles-medium .tile {
+    height: 120px;
+}
+
+.tiles-large .tile {
+    height: 150px;
+    padding: 1.25rem;
+}
+
+.tiles-large .tile-icon {
+    font-size: 3rem;
+    margin-bottom: 0.6rem;
+}
+
+.tiles-large .tile-name {
+    font-size: 0.95rem;
+}
+
+.tiles-large .tile-status {
+    font-size: 0.8rem;
+}
+
+/* Hide Icons Mode */
+body.hide-icons .tile-icon {
+    display: none;
+}
+
+body.hide-icons .tile {
+    height: auto;
+    min-height: 60px;
+}
+
+/* Hide Details Mode */
+body.hide-details .tile-status small {
+    display: none;
+}

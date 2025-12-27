@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>SwitchBot Dashboard</title>
+    <link rel="stylesheet" href="style.css?v=1.8">
+    <!-- Google Fonts for Clock and UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="background"></div>
+
+    <div class="container">
+        <!-- Dashboard Header (Clock, Weather, Calendar) -->
+        <header class="dashboard-header">
+            <!-- Clock Section -->
+            <div class="header-card clock-card">
+                <div id="time" class="time"></div>
+                <div id="date" class="date"></div>
+                <!-- Update Timer Display -->
+                <div id="update-status"></div>
+            </div>
+
+            <!-- Weather Section -->
+            <div id="weather-widget" class="header-card weather-card">
+                <div class="weather-loading">🌤️</div>
+            </div>
+
+            <!-- Calendar Section -->
+            <div id="calendar-widget" class="header-card calendar-card">
+                <div class="widget-title">📅 Calendar</div>
+                <div id="calendar-grid" class="calendar-grid"></div>
+            </div>
+        </header>
+
+        <!-- Scrollable Content Area -->
+        <div id="dashboard-content" class="dashboard-content">
+            <!-- Favorites Section -->
+            <div id="pinned-section" class="section hidden">
+                <h2 class="section-title">お気に入り 🌟</h2>
+                <div id="pinned-grid" class="devices-grid"></div>
+            </div>
+
+            <!-- Main Devices Section -->
+            <div id="main-section" class="section">
+                <div id="devices-container">
+                    <div id="devices-grid" class="devices-grid">
+                        <div class="loading-message">デバイスを読み込み中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Controls -->
+        <div class="footer-controls">
+            <button id="refresh-btn" title="更新">↻</button>
+            <button id="settings-btn" title="設定">⚙️</button>
+        </div>
+
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>設定</h2>
+            <div class="form-group">
+                <label for="api-token">Token</label>
+                <input type="password" id="api-token" placeholder="SwitchBot API Token">
+            </div>
+            <div class="form-group">
+                <label for="client-secret">Client Secret</label>
+                <input type="password" id="client-secret" placeholder="SwitchBot Client Secret">
+            </div>
+
+            <div class="form-group">
+                <label>接続モード</label>
+                <div class="mode-toggle">
+                    <label class="toggle-option">
+                        <input type="radio" name="connection-mode" value="direct" id="mode-direct">
+                        <span class="toggle-label">🔌 拡張機能モード<small>Chrome拡張として使用</small></span>
+                    </label>
+                    <label class="toggle-option">
+                        <input type="radio" name="connection-mode" value="proxy" id="mode-proxy" checked>
+                        <span class="toggle-label">🌐 ブラウザモード<small>プロキシ経由で接続</small></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>外観設定</label>
+                <div class="settings-options">
+                    <div class="setting-row">
+                        <span>タイルサイズ</span>
+                        <select id="tile-size">
+                            <option value="small">小</option>
+                            <option value="medium" selected>中</option>
+                            <option value="large">大</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-icons" checked>
+                            <span>アイコンを表示</span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-details" checked>
+                            <span>詳細情報を表示</span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <span>自動更新間隔</span>
+                        <select id="refresh-interval">
+                            <option value="15">15秒</option>
+                            <option value="30" selected>30秒</option>
+                            <option value="60">1分</option>
+                            <option value="300">5分</option>
+                            <option value="0">オフ</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="hidden-devices-container" class="form-group">
+                <label>デバイス表示設定</label>
+                <p class="help-text">チェックを外すと非表示になります</p>
+                <div id="device-visibility-list" class="device-list"></div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="save-settings-btn" class="primary-btn">保存</button>
+                <button id="close-settings-btn" class="secondary-btn">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=1.8"></script>
+</body>
+
+</html>
