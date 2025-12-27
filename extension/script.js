@@ -681,6 +681,22 @@ function renderDevices() {
     }
 
     // Render Unpinned (Single List)
+    // Sort unpinned devices based on layout.order
+    if (layout.order && layout.order.length > 0) {
+        unpinnedDevices.sort((a, b) => {
+            const indexA = layout.order.indexOf(a.deviceId);
+            const indexB = layout.order.indexOf(b.deviceId);
+            // If both are in order list, sort by index
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+            // If only A is in list, A comes first
+            if (indexA !== -1) return -1;
+            // If only B is in list, B comes first
+            if (indexB !== -1) return 1;
+            // If neither, keep original order (or alphabetical?)
+            return 0;
+        });
+    }
+
     if (unpinnedDevices.length > 0) {
         unpinnedDevices.forEach(dev => {
             const tile = createTile(dev, false);
@@ -894,7 +910,7 @@ function togglePin(deviceId) {
 }
 
 function handleDeviceClick(dev, tile) {
-    const type = dev.deviceType;
+    const type = dev.deviceType || '';
     let command = "turnOn";
 
     if (type.includes("Bot")) command = "press";
@@ -912,7 +928,7 @@ document.addEventListener('dragover', (e) => {
     if (grid) {
         e.preventDefault(); // Allow drop
         grid.classList.add('drag-over-zone');
-        const afterElement = getDragAfterElement(grid, e.clientY);
+        const afterElement = getDragAfterElement(grid, e.clientX, e.clientY);
         const dragging = document.querySelector('.dragging');
         if (dragging) {
             if (afterElement == null) {
@@ -952,15 +968,10 @@ document.addEventListener('drop', (e) => {
             if (layout.pinned.includes(id)) {
                 layout.pinned = layout.pinned.filter(pid => pid !== id);
             }
-            // Sorting/Order in main groups is harder because we auto-group.
-            // For now, allow dropping "into" a group to change visuals but 
-            // persistence of "order within group" needs complexity.
-            // Let's just persist "Pinned vs Unpinned" state for MVP of this feature.
-            // Order within groups will reset on reload based on array order unless we save explicit order.
-            // Feature request said "Drag and drop layout". 
-            // Let's save `layout.order` as a flat list if needed, OR just support Pinned reordering.
-            // User: "Genre... Temperature always visible".
-            // Prioritize Pinnning.
+
+            // Save order for main grid
+            const newOrder = Array.from(grid.children).map(c => c.dataset.id);
+            layout.order = newOrder;
         }
 
         saveLayout();
@@ -968,34 +979,45 @@ document.addEventListener('drop', (e) => {
     }
 });
 
-function getDragAfterElement(container, y) {
+function getDragAfterElement(container, x, y) {
     const draggableElements = [...container.querySelectorAll('.tile:not(.dragging)')];
 
-    return draggableElements.reduce((closest, child) => {
+    const closestObj = draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
-        // Check center of sorting
-        // Grid is 2D, checking Y only works for simple flow.
-        // For Grid, we need X and Y or just distance. 
-        // Simple heuristic: distance to center.
+        // Distance from center
+        const dx = x - (box.left + box.width / 2);
+        const dy = y - (box.top + box.height / 2);
+        const dist = dx * dx + dy * dy;
 
-        // Actually for standard sortable grid, finding the closest element is essential.
-        // Let's skip complex 2D sort math for now and rely on standard append/insert.
-        // If needed, use a library or robust 2D algo. 
-        // Returning null appends to end.
-
-        return closest;
-        // TODO: distinct 2D drag sorting implementation
-        // For now, native drag drop inserts visually but "getDragAfterElement" needs better logic for Grid.
-        // Given complexity, let's keep it simple: Dropping adds to end of that list visually. 
-        // Reordering pinned is useful.
+        if (closest === null || dist < closest.dist) {
+            return { element: child, dist: dist, dx: dx };
+        } else {
+            return closest;
+        }
     }, null);
+
+    if (!closestObj) return null;
+
+    // If we are to the right of the closest element (dx > 0), 
+    // we want to insert AFTER it, which means inserting BEFORE its next sibling.
+    if (closestObj.dx > 0) {
+        return closestObj.element.nextElementSibling;
+    } else {
+        return closestObj.element;
+    }
 }
 
 // --- Event Listeners ---
 settingsBtn.addEventListener('click', async () => {
-    await loadSettings();
-    renderDeviceVisibilityList();
-    settingsModal.classList.remove('hidden');
+    console.log('[UI] Settings button clicked');
+    try {
+        await loadSettings();
+        renderDeviceVisibilityList();
+        settingsModal.classList.remove('hidden');
+    } catch (e) {
+        console.error('[UI] Error opening settings:', e);
+        showToast("設定を開けませんでした: " + e.message, "error");
+    }
 });
 
 closeSettingsBtn.addEventListener('click', () => {
@@ -1006,6 +1028,7 @@ refreshBtn.className = 'footer-btn';
 
 saveSettingsBtn.addEventListener('click', saveSettings);
 refreshBtn.addEventListener('click', () => {
+    console.log('[UI] Refresh button clicked');
     showToast("更新中...");
     fetchDevices();
 });
