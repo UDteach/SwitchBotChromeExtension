@@ -49,7 +49,12 @@ let appearance = {
     tileSize: 'medium',    // small, medium, large
     showIcons: true,
     showDetails: true,
-    refreshInterval: 30    // seconds (0 = off)
+    refreshInterval: 30,   // seconds (0 = off)
+    widgets: {
+        memo: true,
+        system: true,
+        pomodoro: true
+    }
 };
 
 // --- User Interaction Utils ---
@@ -313,13 +318,28 @@ async function loadSettings() {
     const showDetailsEl = document.getElementById('show-details');
     const refreshIntervalEl = document.getElementById('refresh-interval');
 
+    // Widget settings
+    const showMemoEl = document.getElementById('show-memo');
+    const showSystemEl = document.getElementById('show-system');
+    const showPomodoroEl = document.getElementById('show-pomodoro');
+
     if (tileSizeEl) tileSizeEl.value = appearance.tileSize;
     if (showIconsEl) showIconsEl.checked = appearance.showIcons;
     if (showDetailsEl) showDetailsEl.checked = appearance.showDetails;
     if (refreshIntervalEl) refreshIntervalEl.value = appearance.refreshInterval.toString();
 
+    // Default widgets to true if undefined (backward compatibility)
+    if (!appearance.widgets) appearance.widgets = { memo: true, system: true, pomodoro: true };
+
+    if (showMemoEl) showMemoEl.checked = appearance.widgets.memo;
+    if (showSystemEl) showSystemEl.checked = appearance.widgets.system;
+    if (showPomodoroEl) showPomodoroEl.checked = appearance.widgets.pomodoro;
+
     // Apply tile size class
     applyAppearance();
+
+    // Initialize Widgets
+    initWidgets();
 
     return { token, secret };
 }
@@ -335,6 +355,13 @@ async function saveSettings() {
     appearance.showIcons = showIconsEl ? showIconsEl.checked : true;
     appearance.showDetails = showDetailsEl ? showDetailsEl.checked : true;
     appearance.refreshInterval = refreshIntervalEl ? parseInt(refreshIntervalEl.value) : 30;
+
+    // Widget Settings
+    appearance.widgets = {
+        memo: document.getElementById('show-memo').checked,
+        system: document.getElementById('show-system').checked,
+        pomodoro: document.getElementById('show-pomodoro').checked
+    };
 
     await storage.set({
         sb_token: apiTokenInput.value.trim(),
@@ -371,6 +398,195 @@ function applyAppearance() {
     // Apply show/hide icons and details via CSS class on body
     document.body.classList.toggle('hide-icons', !appearance.showIcons);
     document.body.classList.toggle('hide-details', !appearance.showDetails);
+
+    // Apply Widget Visibility
+    const widgets = appearance.widgets || { memo: true, system: true, pomodoro: true };
+    toggleWidget('widget-memo', widgets.memo);
+    toggleWidget('widget-system', widgets.system);
+    toggleWidget('widget-pomodoro', widgets.pomodoro);
+}
+
+function toggleWidget(id, visible) {
+    const el = document.getElementById(id);
+    if (el) {
+        if (visible) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+    }
+}
+
+// --- Secondary Widgets Logic ---
+function initWidgets() {
+    initMemo();
+    initSystemMonitor();
+    initPomodoro();
+}
+
+// 1. Memo Widget
+function initMemo() {
+    const memoInput = document.getElementById('memo-input');
+    if (!memoInput) return;
+
+    // Load saved memo
+    const savedMemo = localStorage.getItem('sb_memo_content');
+    if (savedMemo) memoInput.value = savedMemo;
+
+    // Save on input
+    memoInput.addEventListener('input', () => {
+        localStorage.setItem('sb_memo_content', memoInput.value);
+    });
+}
+
+// 2. System Monitor
+let systemInterval = null;
+function initSystemMonitor() {
+    if (systemInterval) clearInterval(systemInterval);
+
+    const updateSystem = () => {
+        // Check if API is available (only in Extension)
+        const hasApi = (typeof chrome !== 'undefined' && chrome.system && chrome.system.cpu && chrome.system.memory);
+        console.log('[SystemMonitor] API Available:', hasApi);
+
+        if (hasApi) {
+            // CPU
+            chrome.system.cpu.getInfo((info) => {
+                const cores = info.processors;
+                let totalUsage = 0;
+                cores.forEach(core => {
+                    const usage = core.usage;
+                    const total = usage.total - usage.idle; // Approximation logic depending on kernel, but commonly usage.kernel + usage.user
+                    // Chrome API gives cumulative ticks. We need diff.
+                    // Storing prev ticks is needed for accurate %. 
+                    // Simplified for now: just random if complex, BUT actually Chrome API returns cumulative.
+                    // We need a helper for diff.
+                });
+                // Actually, doing CPU diff correctly requires state. 
+                // Let's use a simplified approach or just mock for preview if complex.
+                // Standard approach: Store last ticks.
+            });
+            // Re-implementing full CPU calc:
+            calculateCpuUsage();
+
+            // Memory
+            chrome.system.memory.getInfo((info) => {
+                const capacity = info.capacity;
+                const available = info.availableCapacity;
+                const used = capacity - available;
+                const percent = Math.round((used / capacity) * 100);
+
+                document.getElementById('mem-bar').style.width = `${percent}%`;
+                document.getElementById('mem-text').textContent = `${percent}%`;
+            });
+        } else {
+            console.log('[SystemMonitor] Falling back to Demo mode. chrome.system:', typeof chrome !== 'undefined' ? chrome.system : 'undefined');
+            // Fallback for browser preview (Random Data for demo)
+            const cpu = Math.floor(Math.random() * 30) + 10;
+            const mem = Math.floor(Math.random() * 40) + 30;
+            if (document.getElementById('cpu-bar')) {
+                document.getElementById('cpu-bar').style.width = `${cpu}%`;
+                document.getElementById('cpu-text').textContent = `${cpu}% (Demo)`;
+                document.getElementById('mem-bar').style.width = `${mem}%`;
+                document.getElementById('mem-text').textContent = `${mem}% (Demo)`;
+            }
+        }
+    };
+
+    updateSystem();
+    systemInterval = setInterval(updateSystem, 3000);
+}
+
+// CPU Utils
+let prevCpuInfo = null;
+function calculateCpuUsage() {
+    if (!chrome.system || !chrome.system.cpu) return;
+    chrome.system.cpu.getInfo((info) => {
+        if (prevCpuInfo) {
+            let totalUsage = 0;
+            for (let i = 0; i < info.processors.length; i++) {
+                const prev = prevCpuInfo.processors[i].usage;
+                const curr = info.processors[i].usage;
+
+                const kernelDiff = curr.kernel - prev.kernel;
+                const userDiff = curr.user - prev.user;
+                const idleDiff = curr.idle - prev.idle;
+                const totalDiff = kernelDiff + userDiff + idleDiff;
+
+                if (totalDiff > 0) {
+                    totalUsage += ((kernelDiff + userDiff) / totalDiff) * 100;
+                }
+            }
+            const avg = Math.round(totalUsage / info.processors.length);
+            document.getElementById('cpu-bar').style.width = `${avg}%`;
+            document.getElementById('cpu-text').textContent = `${avg}%`;
+        }
+        prevCpuInfo = info;
+    });
+}
+
+// 3. Pomodoro Timer
+let pomoTimer = null;
+let pomoTimeLeft = 25 * 60;
+let pomoIsRunning = false;
+
+function initPomodoro() {
+    const display = document.getElementById('pomodoro-timer');
+    const startBtn = document.getElementById('pomo-start');
+    const resetBtn = document.getElementById('pomo-reset');
+    const workInput = document.getElementById('pomo-work-time');
+
+    if (!display) return;
+
+    const updateDisplay = () => {
+        const m = Math.floor(pomoTimeLeft / 60).toString().padStart(2, '0');
+        const s = (pomoTimeLeft % 60).toString().padStart(2, '0');
+        display.textContent = `${m}:${s}`;
+    };
+
+    // Initial Set
+    if (workInput) {
+        pomoTimeLeft = parseInt(workInput.value) * 60;
+        updateDisplay();
+
+        workInput.addEventListener('change', () => {
+            if (!pomoIsRunning) {
+                pomoTimeLeft = parseInt(workInput.value) * 60;
+                updateDisplay();
+            }
+        });
+    }
+
+    startBtn.addEventListener('click', () => {
+        if (pomoIsRunning) {
+            // Pause
+            clearInterval(pomoTimer);
+            pomoIsRunning = false;
+            startBtn.textContent = "▶";
+        } else {
+            // Start
+            pomoIsRunning = true;
+            startBtn.textContent = "⏸";
+            pomoTimer = setInterval(() => {
+                if (pomoTimeLeft > 0) {
+                    pomoTimeLeft--;
+                    updateDisplay();
+                } else {
+                    // Time's up
+                    clearInterval(pomoTimer);
+                    pomoIsRunning = false;
+                    startBtn.textContent = "▶";
+                    showToast("🍅 時間です！休憩しましょう。", "success");
+                    // Play sound? (Browser policy might block)
+                }
+            }, 1000);
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        clearInterval(pomoTimer);
+        pomoIsRunning = false;
+        startBtn.textContent = "▶";
+        pomoTimeLeft = parseInt(workInput.value) * 60;
+        updateDisplay();
+    });
 }
 
 async function saveLayout() {

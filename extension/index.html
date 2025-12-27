@@ -18,7 +18,8 @@
 </head>
 
 <body>
-    <div class="background"></div>
+    <div class="background" id="bg-image"></div>
+    <div class="background-overlay"></div>
 
     <div class="container">
         <!-- Dashboard Header (Clock, Weather, Calendar) -->
@@ -42,6 +43,47 @@
                 <div id="calendar-grid" class="calendar-grid"></div>
             </div>
         </header>
+
+        <!-- Secondary Widgets (Memo, System, Pomodoro) -->
+        <div id="secondary-widgets" class="widget-row">
+            <!-- Memo Widget -->
+            <div class="widget-card memo-card" id="widget-memo">
+                <div class="widget-title">📝 Quick Memo</div>
+                <textarea id="memo-input" placeholder="買うものリスト..."></textarea>
+            </div>
+
+            <!-- System Monitor Widget -->
+            <div class="widget-card system-card" id="widget-system">
+                <div class="widget-title">💻 System Info</div>
+                <div class="system-stats">
+                    <div class="stat-row">
+                        <span>CPU</span>
+                        <div class="progress-bar">
+                            <div id="cpu-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="cpu-text">--%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>MEM</span>
+                        <div class="progress-bar">
+                            <div id="mem-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="mem-text">--%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pomodoro Widget -->
+            <div class="widget-card pomodoro-card" id="widget-pomodoro">
+                <div class="widget-title">🍅 Focus Timer</div>
+                <div class="timer-display" id="pomodoro-timer">25:00</div>
+                <div class="timer-controls">
+                    <button id="pomo-start">▶</button>
+                    <button id="pomo-reset">↺</button>
+                    <input type="number" id="pomo-work-time" value="25" min="1" max="60" title="作業時間(分)">
+                </div>
+            </div>
+        </div>
 
         <!-- Scrollable Content Area -->
         <div id="dashboard-content" class="dashboard-content">
@@ -134,8 +176,31 @@
 
             <div id="hidden-devices-container" class="form-group">
                 <label>デバイス表示設定</label>
-                <p class="help-text">チェックを外すと非表示になります</p>
                 <div id="device-visibility-list" class="device-list"></div>
+            </div>
+
+            <div class="form-group">
+                <label>ウィジェット表示設定</label>
+                <div class="settings-options">
+                    <div class="setting-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-memo" checked>
+                            <span>📝 メモ帳</span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-system" checked>
+                            <span>💻 システム情報</span>
+                        </label>
+                    </div>
+                    <div class="setting-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-pomodoro" checked>
+                            <span>🍅 ポモドーロ</span>
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <div class="modal-actions">
@@ -145,6 +210,7 @@
         </div>
     </div>
 
+    <script src="wallpaper.js"></script>
     <script src="script.js?v=1.8"></script>
 </body>
 

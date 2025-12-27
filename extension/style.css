@@ -38,9 +38,37 @@ body {
     }
 }
 
-/* Abstract blobs for "Liquid" feel */
+/* Abstract blobs for "Liquid" feel - KEPT for fallback or overlay mix */
+/* Updated .background for wallpaper support */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background-size: cover;
+    background-position: center;
+    transition: background 1s ease-in-out;
+}
+
+/* Dark Overlay for readability */
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 32, 39, 0.7);
+    /* Dark blue-ish overlay */
+    z-index: -1;
+    backdrop-filter: blur(3px);
+}
+
 .background::before,
 .background::after {
+    display: none;
+    /* Disable blobs when wallpaper is active, or keep? Let's hide for clean look */
     content: '';
     position: absolute;
     width: 600px;
@@ -96,9 +124,151 @@ body {
     width: 100%;
     max-width: 1200px;
     margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding: 0 1rem;
+    flex-wrap: wrap;
+}
+
+/* Secondary Widgets */
+.widget-row {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
     margin-bottom: 2rem;
     padding: 0 1rem;
     flex-wrap: wrap;
+}
+
+.widget-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-amount));
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.2rem;
+    box-shadow: var(--glass-shadow);
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    min-height: 140px;
+    transition: transform 0.3s;
+}
+
+.widget-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.widget-card.hidden {
+    display: none !important;
+}
+
+/* Memo Widget */
+.memo-card textarea {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    resize: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.memo-card textarea:focus {
+    outline: none;
+}
+
+/* System Monitor */
+.system-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.stat-row span:first-child {
+    width: 30px;
+    font-weight: 600;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-color);
+    border-radius: 3px;
+    transition: width 0.5s ease-out;
+}
+
+#mem-bar {
+    background: #ff9f43;
+}
+
+/* Pomodoro */
+.pomodoro-card {
+    align-items: center;
+    justify-content: space-between;
+}
+
+.timer-display {
+    font-size: 2.5rem;
+    font-weight: 200;
+    font-feature-settings: "tnum";
+    color: var(--text-primary);
+}
+
+.timer-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.timer-controls button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.timer-controls button:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.timer-controls input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 50px;
+    padding: 5px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.9rem;
 }
 
 .header-card {
